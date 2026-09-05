@@ -10,11 +10,11 @@ app.use(cors(
   {  credentials:true,
     origin: "http://localhost:5173"}
 ))
-app.use(express.static('../public'))
 
 const authRouter =  require('./Routes/auth.routes')
 const postRouter=require('./Routes/post.routes')
 const userRouter=require('./Routes/user.routes')
+
 const publicpath=path.join(__dirname,"../public")
 
 app.use('/auth',authRouter);
