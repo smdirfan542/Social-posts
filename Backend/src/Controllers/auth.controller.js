@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const bcrypt = require('bcrypt')
 const userModel = require('../Models/usermodel')
 const jwt = require('jsonwebtoken')
 
@@ -34,10 +35,11 @@ async function registerController  (req,res){
 
 
     
-    const hash = crypto.createHash('md5').update(password).digest('hex');
+    const hash =await bcrypt.hash(password,10);
     const user = await userModel.create({username, email , password:hash , profile_pic, bio});
     const token = jwt.sign({
         id:user._id,
+        
         email
     },process.env.JWT_SECRET_KEY)
 
@@ -63,22 +65,35 @@ async function loginController (req,res){
         $or:[
             {username},{email}
         ]
-    })
+    }).select('password')
     
     if(!user){return res.status(200).json({message:'Please do register first'+(user.username!=username ? " username doesnot exist":" This email doesnot exists")
     })}
 
-    const checkPsd = crypto.createHash('md5') .update(user.password).digest('hex') === password;
+    const userotherdetails=await userModel.findById(user.id)
+    
+    const checkPsd =await bcrypt.compare(password,user.password);
     if(!checkPsd){
         return res.status(200).json({message:'Invalid Credentials'});
     }
     const token = jwt.sign({
         id:user._id,
-        email:user.email
+        username:userotherdetails.username,
+        email:userotherdetails.email
     },process.env.JWT_SECRET_KEY,{expiresIn:"1d"})
     res.cookie('token',token);
     res.status(200).json({
-        message:'successfully logged in'
+        message:'successfully logged in',
+        userotherdetails
+    })
+}
+
+async function logoutController(req,res){
+    res.clearCookie('token')
+
+    res.status(200).json({
+        message:'Logged out successfully',
+
     })
 }
 
@@ -96,11 +111,14 @@ async function tokenController (req,res){
     
     res.status(200).json({
         message:'successfully fetched the accoutnt with cookie',
+        
         username:user.username,
-        useremail:user.email
+        useremail:user.email,
+        bio:user.bio,
+        profile_pic:user.profile_pic
     })
     
 }
 module.exports={
-    registerController,loginController,deleteController,tokenController
+    registerController,loginController,deleteController,tokenController,logoutController
 }
