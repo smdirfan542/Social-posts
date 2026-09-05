@@ -10,20 +10,22 @@ app.use(cors(
   {  credentials:true,
     origin: "http://localhost:5173"}
 ))
-
+app.use(express.static('../public'))
 
 const authRouter =  require('./Routes/auth.routes')
 const postRouter=require('./Routes/post.routes')
 const userRouter=require('./Routes/user.routes')
-
+const publicpath=path.join(__dirname,"../public")
 
 app.use('/auth',authRouter);
 app.use('/posts',postRouter);
 app.use('/users',userRouter)
-app.use(path.join(__dirname,"public"))
 
-app.get("*",(req,res)=>{
-  res.sendFile(express.static(path.join(__dirname,"public","index.html")))
+app.use(express.static(publicpath))
+
+
+app.get("*sfsda",(req,res)=>{
+  res.sendFile(path.join(publicpath,"index.html"))
 })
 
 
