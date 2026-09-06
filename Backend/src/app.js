@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cookieparser());
 app.use(cors(
   {  credentials:true,
-    origin: "http://localhost:5173"}
+    origin: "https://social-posts-frontend.onrender.com"}
 ))
 
 const authRouter =  require('./Routes/auth.routes')
