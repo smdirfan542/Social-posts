@@ -62,19 +62,17 @@ async function loginController (req,res){
     const  {username,email,password}= req.body;
 
     const user = await userModel.findOne({
-        $or:[
-            {username},{email}
-        ]
+         $or: [ ...(username ? [{ username }] : []), ...(email ? [{ email }] : []) ]
     }).select('password')
     
-    if(!user){return res.status(200).json({message:'Please do register first'+(user.username!=username ? " username doesnot exist":" This email doesnot exists")
+    if(!user){return res.status(200).json({message:'Please do register first'
     })}
 
     const userotherdetails=await userModel.findById(user.id)
     
     const checkPsd =await bcrypt.compare(password,user.password);
     if(!checkPsd){
-        return res.status(200).json({message:'Invalid Credentials'});
+        return res.status(401).json({message:'Invalid Credentials'});
     }
     const token = jwt.sign({
         id:user._id,
